@@ -28,20 +28,27 @@ if ($session) {
     $request = new FacebookRequest($session, 'GET', '/me');
     $response = $request->execute();
     $graphObject = $response->getGraphObject();
-    // $graphArray = $graphObject->asArray();
+    $me = $graphObject->asArray();
+    formatMe($me);
 
     // Get personal friends
     $request = new FacebookRequest($session, 'GET', '/me/taggable_friends');
     $response = $request->execute();
     $graphObject = $response->getGraphObject();
-    var_dump($graphObject);
+    $friends = $graphObject->asArray();
+    foreach ($friends['data'] as $friend) {
+        formatFriend($friend);
+    }
     echo '<br />';
 
     // Get personal groups
     $request = new FacebookRequest($session, 'GET', '/me/groups');
     $response = $request->execute();
     $graphObject = $response->getGraphObject();
-    var_dump($graphObject);
+    $groups = $graphObject->asArray();
+    foreach ($groups['data'] as $group) {
+        formatGroup($group);
+    }
     echo '<br />';
 
     // Get personal feeds
@@ -51,4 +58,23 @@ if ($session) {
     // var_dump($graphObject);
 }
 
+function formatMe($ary) {
+    $id = $ary['id'];
+    $name = $ary['name'];
+    echo "<p>{$id} {$name}</p>";
+}
+
+function formatFriend($obj) {
+    $id = $obj->id;
+    $name = $obj->name;
+    $picture = $obj->picture->data->url;
+
+    echo "<p>{$id} {$name} <img src='{$picture}' /></p>";
+}
+
+function formatGroup($obj) {
+    $id = $obj->id;
+    $name = $obj->name;
+    echo "<p>{$id} {$name}</p>";
+}
 ?>

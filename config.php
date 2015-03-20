@@ -7,5 +7,5 @@ session_start();
 
 FacebookSession::setDefaultApplication('YOUR_APP_ID', 'YOUR_APP_SECRET');
 
-$redirectUrl = 'http://your.redirect.url';
+$redirectUrl = 'http://your.redirect.url/callback.php';
 ?>
