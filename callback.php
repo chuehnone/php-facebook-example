@@ -24,57 +24,74 @@ if (isset($_SESSION['facebook'])) {
 if ($session) {
     $_SESSION['facebook'] = $session;
 
+    echo "<form action='{$saveUrl}' method='post' name='saveForm'>";
+
     // Get personal info
     $request = new FacebookRequest($session, 'GET', '/me');
     $response = $request->execute();
     $graphObject = $response->getGraphObject();
     $me = $graphObject->asArray();
-    formatMe($me);
+    formatMeInput($me);
 
     // Get personal friends
     $request = new FacebookRequest($session, 'GET', '/me/taggable_friends');
     $response = $request->execute();
     $graphObject = $response->getGraphObject();
     $friends = $graphObject->asArray();
-    foreach ($friends['data'] as $friend) {
-        formatFriend($friend);
+    if (isset($friends['data'])) {
+        formatFriendInput($friends['data']);
     }
-    echo '<br />';
 
     // Get personal groups
     $request = new FacebookRequest($session, 'GET', '/me/groups');
     $response = $request->execute();
     $graphObject = $response->getGraphObject();
     $groups = $graphObject->asArray();
-    foreach ($groups['data'] as $group) {
-        formatGroup($group);
+    if (isset($groups['data'])) {
+        formatGroupInput($groups['data']);
     }
-    echo '<br />';
 
     // Get personal feeds
     // $request = new FacebookRequest($session, 'GET', '/me/feed');
     // $response = $request->execute();
     // $graphObject = $response->getGraphObject();
     // var_dump($graphObject);
+    
+    echo '</form>';
+    echo '<script language="javascript">document.saveForm.submit();</script>';
 }
 
-function formatMe($ary) {
+function formatMeInput($ary) {
     $id = $ary['id'];
     $name = $ary['name'];
-    echo "<p>{$id} {$name}</p>";
+    $jsonAry = array('id' => $id, 'name' => $name);
+
+    $json = json_encode($jsonAry);
+    echo "<input type='hidden' name='formatMe' value='{$json}' />";
 }
 
-function formatFriend($obj) {
-    $id = $obj->id;
-    $name = $obj->name;
-    $picture = $obj->picture->data->url;
+function formatFriendInput($ary) {
+    $jsonAry = array();
+    foreach ($ary as $friend) {
+        $id = $friend->id;
+        $name = $friend->name;
+        $picture = $friend->picture->data->url;
+        $jsonAry[] = array('id' => $id, 'name' => $name, 'picture' => $picture);
+    }
 
-    echo "<p>{$id} {$name} <img src='{$picture}' /></p>";
+    $json = json_encode($jsonAry);
+    echo "<input type='hidden' name='formatFriend' value='{$json}' />";
 }
 
-function formatGroup($obj) {
-    $id = $obj->id;
-    $name = $obj->name;
-    echo "<p>{$id} {$name}</p>";
+function formatGroupInput($ary) {
+    $jsonAry = array();
+    foreach ($ary as $group) {
+        $id = $group->id;
+        $name = $group->name;
+        $jsonAry[] = array('id' => $id, 'name' => $name);
+    }
+
+    $json = json_encode($jsonAry);
+    echo "<input type='hidden' name='formatGroup' value='{$json}' />";
 }
 ?>

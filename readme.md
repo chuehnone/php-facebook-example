@@ -8,6 +8,7 @@ This is an easy example
 
 #### Required
 1. Facebook permission: 
+
 > public_profile
 
 > user_friends 
