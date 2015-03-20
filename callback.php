@@ -31,7 +31,7 @@ if ($session) {
     // $graphArray = $graphObject->asArray();
 
     // Get personal friends
-    $request = new FacebookRequest($session, 'GET', '/me/friendlists');
+    $request = new FacebookRequest($session, 'GET', '/me/taggable_friends');
     $response = $request->execute();
     $graphObject = $response->getGraphObject();
     var_dump($graphObject);
@@ -42,6 +42,13 @@ if ($session) {
     $response = $request->execute();
     $graphObject = $response->getGraphObject();
     var_dump($graphObject);
+    echo '<br />';
+
+    // Get personal feeds
+    // $request = new FacebookRequest($session, 'GET', '/me/feed');
+    // $response = $request->execute();
+    // $graphObject = $response->getGraphObject();
+    // var_dump($graphObject);
 }
 
 ?>
