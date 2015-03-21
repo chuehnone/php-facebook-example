@@ -29,26 +29,26 @@ if ($session) {
     // Get personal info
     $request = new FacebookRequest($session, 'GET', '/me');
     $response = $request->execute();
-    $graphObject = $response->getGraphObject();
-    $me = $graphObject->asArray();
-    formatMeInput($me);
+    $me = $response->getGraphObject()->asArray();
+    $meJson = json_encode(formatMe($me));
+    echoInput('formatMe', $meJson);
 
     // Get personal friends
     $request = new FacebookRequest($session, 'GET', '/me/taggable_friends');
     $response = $request->execute();
-    $graphObject = $response->getGraphObject();
-    $friends = $graphObject->asArray();
+    $friends = $response->getGraphObject()->asArray();
     if (isset($friends['data'])) {
-        formatFriendInput($friends['data']);
+        $friendsJson = json_encode(formatFriend($friends['data']));
+        echoInput('formatFriend', $friendsJson);
     }
 
     // Get personal groups
     $request = new FacebookRequest($session, 'GET', '/me/groups');
     $response = $request->execute();
-    $graphObject = $response->getGraphObject();
-    $groups = $graphObject->asArray();
+    $groups = $response->getGraphObject()->asArray();
     if (isset($groups['data'])) {
-        formatGroupInput($groups['data']);
+        $groupsJson = json_encode(formatGroup($groups['data']));
+        echoInput('formatGroup', $groupsJson);
     }
 
     // Get personal feeds
@@ -56,21 +56,35 @@ if ($session) {
     // $response = $request->execute();
     // $graphObject = $response->getGraphObject();
     // var_dump($graphObject);
-    
+
+    // Get personal fan pages
+    $request = new FacebookRequest($session, 'GET', '/me/likes');
+    $fanPagesJsonAry = array();
+    do {
+        $response = $request->execute();
+        $fanPages = $response->getGraphObject()->asArray();
+        if (isset($fanPages['data'])) {
+            $fanPagesJsonAry = array_merge($fanPagesJsonAry, formatFanPage($fanPages['data']));
+        }
+    } while ($request = $response->getRequestForNextPage());
+    if (!empty($fanPagesJsonAry)) {
+        $fanPagesJson = json_encode($fanPagesJsonAry);
+        echoInput('formatFanPage', $fanPagesJson);
+    }
+
     echo '</form>';
     echo '<script language="javascript">document.saveForm.submit();</script>';
 }
 
-function formatMeInput($ary) {
+function formatMe($ary) {
     $id = $ary['id'];
     $name = $ary['name'];
     $jsonAry = array('id' => $id, 'name' => $name);
 
-    $json = json_encode($jsonAry);
-    echo "<input type='hidden' name='formatMe' value='{$json}' />";
+    return $jsonAry;
 }
 
-function formatFriendInput($ary) {
+function formatFriend($ary) {
     $jsonAry = array();
     foreach ($ary as $friend) {
         $id = $friend->id;
@@ -79,11 +93,10 @@ function formatFriendInput($ary) {
         $jsonAry[] = array('id' => $id, 'name' => $name, 'picture' => $picture);
     }
 
-    $json = json_encode($jsonAry);
-    echo "<input type='hidden' name='formatFriend' value='{$json}' />";
+    return $jsonAry;
 }
 
-function formatGroupInput($ary) {
+function formatGroup($ary) {
     $jsonAry = array();
     foreach ($ary as $group) {
         $id = $group->id;
@@ -91,7 +104,21 @@ function formatGroupInput($ary) {
         $jsonAry[] = array('id' => $id, 'name' => $name);
     }
 
-    $json = json_encode($jsonAry);
-    echo "<input type='hidden' name='formatGroup' value='{$json}' />";
+    return $jsonAry;
+}
+
+function formatFanPage($ary) {
+    $jsonAry = array();
+    foreach ($ary as $fanpage) {
+        $id = $fanpage->id;
+        $name = $fanpage->name;
+        $category = $fanpage->category;
+        $jsonAry[] = array('id' => $id, 'name' => $name, 'category' => $category);
+    }
+    return $jsonAry;
+}
+
+function echoInput($name, $value) {
+    echo "<input type='hidden' name='{$name}' value='{$value}' />";
 }
 ?>
